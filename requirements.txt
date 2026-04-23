@@ -3,4 +3,4 @@ numpy
 nltk==3.9.4
 fastapi
 uvicorn
-
+requests
