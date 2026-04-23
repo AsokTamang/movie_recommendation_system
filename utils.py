@@ -34,7 +34,7 @@ def recommend_movies(movie_name):
             "poster": fetch_poster(similar_movie_id)  # using the actual movie_id column
         })
     return result
-print(recommend_movies('Avatar'))
+
 
 
 
