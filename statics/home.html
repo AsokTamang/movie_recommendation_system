@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineMatch — Movie Recommender</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --card: #1a1a24;
+      --accent: #e8c84a;
+      --accent2: #ff6b35;
+      --text: #f0ede6;
+      --muted: #7a7a8a;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* --- Background grain + glow --- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(232,200,74,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(255,107,53,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 24px 80px;
+    }
+
+    /* --- Header --- */
+    header {
+      text-align: center;
+      margin-bottom: 52px;
+      animation: fadeDown 0.7s ease both;
+    }
+
+    .logo-pill {
+      display: inline-block;
+      background: rgba(232,200,74,0.12);
+      border: 1px solid rgba(232,200,74,0.25);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 9vw, 96px);
+      letter-spacing: 0.04em;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--text) 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.02em;
+    }
+
+    /* --- Search Box --- */
+    .search-section {
+      width: 100%;
+      max-width: 620px;
+      animation: fadeUp 0.7s 0.15s ease both;
+    }
+
+    .search-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px 6px 6px 20px;
+      transition: border-color 0.2s;
+    }
+
+    .search-row:focus-within {
+      border-color: rgba(232,200,74,0.4);
+      box-shadow: 0 0 0 3px rgba(232,200,74,0.06);
+    }
+
+    #movieInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    #movieInput::placeholder { color: var(--muted); }
+
+    /* Autocomplete dropdown */
+    .autocomplete-wrapper { position: relative; flex: 1; display: flex; }
+
+    #suggestions {
+      position: absolute;
+      top: calc(100% + 16px);
+      left: -20px;
+      right: -6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    #suggestions.open { display: block; }
+
+    .suggestion-item {
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text);
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover, .suggestion-item.active {
+      background: rgba(232,200,74,0.08);
+      color: var(--accent);
+    }
+
+    #recommendBtn {
+      background: var(--accent);
+      color: #0a0a0f;
+      border: none;
+      border-radius: 10px;
+      padding: 0 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      height: 46px;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    #recommendBtn:hover { background: #f0d45a; transform: translateY(-1px); }
+    #recommendBtn:active { transform: translateY(0); }
+    #recommendBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* --- Divider --- */
+    .divider {
+      width: 100%;
+      max-width: 620px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 40px 0 0;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .divider.visible { opacity: 1; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-text { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* --- Results Grid --- */
+    #results {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 32px;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+    }
+
+    .movie-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardIn 0.5s ease forwards;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      border-color: rgba(232,200,74,0.2);
+    }
+
+    .movie-card img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      background: var(--surface);
+    }
+
+    .movie-card-body {
+      padding: 12px 14px 14px;
+    }
+
+    .movie-rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .movie-title {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    /* --- Error / Loading --- */
+    .status-msg {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 40px 0;
+      display: none;
+    }
+
+    .error-msg {
+      text-align: center;
+      color: #ff6b6b;
+      font-size: 14px;
+      padding: 20px 0;
+      display: none;
+    }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    /* --- Animations --- */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* stagger cards */
+    .movie-card:nth-child(1) { animation-delay: 0.05s; }
+    .movie-card:nth-child(2) { animation-delay: 0.12s; }
+    .movie-card:nth-child(3) { animation-delay: 0.19s; }
+    .movie-card:nth-child(4) { animation-delay: 0.26s; }
+    .movie-card:nth-child(5) { animation-delay: 0.33s; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo-pill">🎬 AI Powered</div>
+    <h1>CineMatch</h1>
+    <p class="tagline">Find your next favourite film, instantly.</p>
+  </header>
+
+  <section class="search-section">
+    <label class="search-label" for="movieInput">Enter a movie you love</label>
+    <div class="search-row">
+      <div class="autocomplete-wrapper">
+        <input
+          type="text"
+          id="movieInput"
+          placeholder="e.g. Inception, The Dark Knight…"
+          autocomplete="off"
+        />
+        <div id="suggestions"></div>
+      </div>
+      <button id="recommendBtn" onclick="getRecommendations()">Recommend →</button>
+    </div>
+  </section>
+
+  <div class="divider" id="divider">
+    <div class="divider-line"></div>
+    <span class="divider-text">Recommendations</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <div id="results">
+    <div class="status-msg" id="loadingMsg">
+      <div class="spinner"></div>
+      Finding movies you'll love…
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="results-grid" id="grid"></div>
+  </div>
+
+</div>
+
+<script>
+  // ── Movie list for autocomplete (fetched from backend or hardcoded sample) ──
+  // Replace this array with your actual movie titles from movie_df or fetch from an endpoint
+  let ALL_MOVIES = [];
+
+  // Try to load movie list from a /movies endpoint (optional)
+  fetch('/movies')
+    .then(r => r.json())
+    .then(data => { ALL_MOVIES = data.movies || []; })
+    .catch(() => { /* no autocomplete endpoint, that's fine */ });
+
+  // ── Autocomplete logic ──
+  const input = document.getElementById('movieInput');
+  const suggestionsBox = document.getElementById('suggestions');
+  let activeIndex = -1;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    suggestionsBox.innerHTML = '';
+    activeIndex = -1;
+    if (!q || q.length < 2) { suggestionsBox.classList.remove('open'); return; }
+
+    const matches = ALL_MOVIES
+      .filter(m => m.toLowerCase().includes(q))
+      .slice(0, 8);
+
+    if (!matches.length) { suggestionsBox.classList.remove('open'); return; }
+
+    matches.forEach((m, i) => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.textContent = m;
+      item.addEventListener('mousedown', () => {
+        input.value = m;
+        suggestionsBox.classList.remove('open');
+      });
+      suggestionsBox.appendChild(item);
+    });
+    suggestionsBox.classList.add('open');
+  });
+
+  input.addEventListener('keydown', (e) => {
+    const items = suggestionsBox.querySelectorAll('.suggestion-item');
+    if (e.key === 'ArrowDown') {
+      activeIndex = Math.min(activeIndex + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+    } else if (e.key === 'ArrowUp') {
+      activeIndex = Math.max(activeIndex - 1, 0);
+      items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+    } else if (e.key === 'Enter') {
+      if (activeIndex >= 0 && items[activeIndex]) {
+        input.value = items[activeIndex].textContent;
+        suggestionsBox.classList.remove('open');
+      } else {
+        getRecommendations();
+      }
+    } else if (e.key === 'Escape') {
+      suggestionsBox.classList.remove('open');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrapper')) suggestionsBox.classList.remove('open');
+  });
+
+  // ── Recommend function ──
+  async function getRecommendations() {
+    const movieName = input.value.trim();
+    if (!movieName) { shakeInput(); return; }
+
+    const btn = document.getElementById('recommendBtn');
+    const grid = document.getElementById('grid');
+    const loadingMsg = document.getElementById('loadingMsg');
+    const errorMsg = document.getElementById('errorMsg');
+    const divider = document.getElementById('divider');
+
+    btn.disabled = true;
+    btn.textContent = 'Loading…';
+    grid.innerHTML = '';
+    errorMsg.style.display = 'none';
+    loadingMsg.style.display = 'block';
+    divider.classList.add('visible');
+    suggestionsBox.classList.remove('open');
+
+    try {
+      const res = await fetch(`/recommend?data=${encodeURIComponent(movieName)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const json = await res.json();
+
+      loadingMsg.style.display = 'none';
+
+      if (json.error) throw new Error(json.error);
+
+      const recommendations = json.recommendation;
+      if (!recommendations || !recommendations.length) {
+        throw new Error('No recommendations found. Try another movie.');
+      }
+
+      renderCards(recommendations);
+
+    } catch (err) {
+      loadingMsg.style.display = 'none';
+      errorMsg.style.display = 'block';
+      errorMsg.textContent = '⚠️ ' + (err.message || 'Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Recommend →';
+    }
+  }
+
+  function renderCards(movies) {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    movies.forEach((movie, i) => {
+      const card = document.createElement('div');
+      card.className = 'movie-card';
+
+      const img = document.createElement('img');
+      img.src = movie.poster || 'https://via.placeholder.com/200x300/13131a/7a7a8a?text=No+Poster';
+      img.alt = movie.title;
+      img.onerror = () => { img.src = 'https://via.placeholder.com/200x300/13131a/7a7a8a?text=No+Poster'; };
+
+      const body = document.createElement('div');
+      body.className = 'movie-card-body';
+
+      const rank = document.createElement('div');
+      rank.className = 'movie-rank';
+      rank.textContent = `#${i + 1} Pick`;
+
+      const title = document.createElement('div');
+      title.className = 'movie-title';
+      title.textContent = movie.title;
+
+      body.appendChild(rank);
+      body.appendChild(title);
+      card.appendChild(img);
+      card.appendChild(body);
+      grid.appendChild(card);
+    });
+  }
+
+  function shakeInput() {
+    const row = document.querySelector('.search-row');
+    row.style.animation = 'none';
+    row.style.borderColor = 'rgba(255,107,53,0.5)';
+    setTimeout(() => { row.style.borderColor = ''; }, 800);
+  }
+</script>
+</body>
+</html>
