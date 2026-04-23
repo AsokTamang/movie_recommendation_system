@@ -13,7 +13,6 @@
       --surface: #13131a;
       --card: #1a1a24;
       --accent: #e8c84a;
-      --accent2: #ff6b35;
       --text: #f0ede6;
       --muted: #7a7a8a;
       --border: rgba(255,255,255,0.07);
@@ -27,214 +26,190 @@
       overflow-x: hidden;
     }
 
-    /* --- Background grain + glow --- */
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background:
         radial-gradient(ellipse 80% 50% at 20% 10%, rgba(232,200,74,0.07) 0%, transparent 60%),
         radial-gradient(ellipse 60% 60% at 80% 80%, rgba(255,107,53,0.06) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
     body::after {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
+      pointer-events: none; z-index: 0; opacity: 0.4;
     }
 
     .wrapper {
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: 60px 24px 80px;
     }
 
-    /* --- Header --- */
-    header {
-      text-align: center;
-      margin-bottom: 52px;
-      animation: fadeDown 0.7s ease both;
-    }
+    /* Header */
+    header { text-align: center; margin-bottom: 52px; animation: fadeDown 0.7s ease both; }
 
     .logo-pill {
       display: inline-block;
       background: rgba(232,200,74,0.12);
       border: 1px solid rgba(232,200,74,0.25);
       color: var(--accent);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 100px;
-      margin-bottom: 20px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 20px;
     }
 
     h1 {
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(52px, 9vw, 96px);
-      letter-spacing: 0.04em;
-      line-height: 0.9;
+      letter-spacing: 0.04em; line-height: 0.9;
       background: linear-gradient(135deg, var(--text) 30%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
     .tagline {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 15px;
-      font-weight: 300;
-      font-style: italic;
-      letter-spacing: 0.02em;
+      margin-top: 14px; color: var(--muted);
+      font-size: 15px; font-weight: 300; font-style: italic; letter-spacing: 0.02em;
     }
 
-    /* --- Search Box --- */
+    /* Select Section */
     .search-section {
-      width: 100%;
-      max-width: 620px;
+      width: 100%; max-width: 620px;
       animation: fadeUp 0.7s 0.15s ease both;
     }
 
     .search-label {
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-      display: block;
+      font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; display: block;
     }
 
-    .search-row {
-      display: flex;
-      gap: 10px;
+    .select-row {
+      display: flex; gap: 10px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 6px 6px 6px 20px;
-      transition: border-color 0.2s;
+      padding: 6px 6px 6px 4px;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .search-row:focus-within {
+    .select-row:focus-within {
       border-color: rgba(232,200,74,0.4);
       box-shadow: 0 0 0 3px rgba(232,200,74,0.06);
     }
 
-    #movieInput {
-      flex: 1;
+    .select-wrapper {
+      flex: 1; position: relative; display: flex; align-items: center;
+    }
+
+    .select-icon {
+      position: absolute; left: 14px;
+      font-size: 16px; pointer-events: none; z-index: 1;
+    }
+
+    .select-arrow {
+      position: absolute; right: 12px;
+      color: var(--muted); font-size: 11px;
+      pointer-events: none; transition: transform 0.2s, color 0.2s;
+    }
+
+    #movieSelect {
+      width: 100%;
       background: transparent;
-      border: none;
-      outline: none;
+      border: none; outline: none;
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-    }
-
-    #movieInput::placeholder { color: var(--muted); }
-
-    /* Autocomplete dropdown */
-    .autocomplete-wrapper { position: relative; flex: 1; display: flex; }
-
-    #suggestions {
-      position: absolute;
-      top: calc(100% + 16px);
-      left: -20px;
-      right: -6px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      z-index: 100;
-      display: none;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    }
-
-    #suggestions.open { display: block; }
-
-    .suggestion-item {
-      padding: 11px 16px;
+      font-size: 15px; font-weight: 400;
+      padding: 13px 36px 13px 42px;
       cursor: pointer;
-      font-size: 14px;
+      appearance: none; -webkit-appearance: none;
+    }
+
+    #movieSelect option {
+      background: #1a1a24;
       color: var(--text);
-      transition: background 0.15s;
-      border-bottom: 1px solid var(--border);
+      font-size: 14px;
     }
-    .suggestion-item:last-child { border-bottom: none; }
-    .suggestion-item:hover, .suggestion-item.active {
-      background: rgba(232,200,74,0.08);
-      color: var(--accent);
+
+    #movieSelect option:first-child { color: var(--muted); }
+    #movieSelect:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Spinner inside select wrapper */
+    .select-spinner {
+      display: none;
+      position: absolute; right: 32px;
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
     }
+    .select-spinner.visible { display: block; }
+
+    .movie-count {
+      margin-top: 8px; font-size: 12px;
+      color: var(--muted); display: none; padding-left: 4px;
+    }
+    .movie-count.visible { display: block; }
+    .movie-count span { color: var(--accent); font-weight: 500; }
 
     #recommendBtn {
-      background: var(--accent);
-      color: #0a0a0f;
-      border: none;
-      border-radius: 10px;
+      background: var(--accent); color: #0a0a0f;
+      border: none; border-radius: 10px;
       padding: 0 24px;
       font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      height: 46px;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      height: 50px;
       transition: background 0.2s, transform 0.15s;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.02em; flex-shrink: 0;
     }
-
     #recommendBtn:hover { background: #f0d45a; transform: translateY(-1px); }
     #recommendBtn:active { transform: translateY(0); }
     #recommendBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* --- Divider --- */
+    /* Divider */
     .divider {
-      width: 100%;
-      max-width: 620px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 40px 0 0;
-      opacity: 0;
-      transition: opacity 0.4s;
+      width: 100%; max-width: 620px;
+      display: flex; align-items: center; gap: 16px;
+      margin: 40px 0 0; opacity: 0; transition: opacity 0.4s;
     }
     .divider.visible { opacity: 1; }
     .divider-line { flex: 1; height: 1px; background: var(--border); }
     .divider-text { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
 
-    /* --- Results Grid --- */
-    #results {
-      width: 100%;
-      max-width: 1000px;
-      margin-top: 32px;
+    /* Selected movie banner */
+    .selected-banner {
+      width: 100%; max-width: 1000px;
+      margin-top: 24px;
+      background: rgba(232,200,74,0.06);
+      border: 1px solid rgba(232,200,74,0.15);
+      border-radius: 12px;
+      padding: 13px 20px;
+      display: none; align-items: center; gap: 10px;
     }
+    .selected-banner.visible { display: flex; }
+    .selected-banner-label { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .selected-banner-title { font-size: 15px; font-weight: 500; color: var(--accent); }
+
+    /* Results */
+    #results { width: 100%; max-width: 1000px; margin-top: 20px; }
 
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
       gap: 20px;
     }
 
     .movie-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(20px);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      opacity: 0; transform: translateY(20px);
       animation: cardIn 0.5s ease forwards;
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
-
     .movie-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 16px 40px rgba(0,0,0,0.5);
@@ -242,75 +217,38 @@
     }
 
     .movie-card img {
-      width: 100%;
-      aspect-ratio: 2/3;
-      object-fit: cover;
-      display: block;
+      width: 100%; aspect-ratio: 2/3;
+      object-fit: cover; display: block;
       background: var(--surface);
     }
 
-    .movie-card-body {
-      padding: 12px 14px 14px;
-    }
+    .movie-card-body { padding: 12px 14px 14px; }
 
     .movie-rank {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-      margin-bottom: 4px;
+      font-size: 11px; letter-spacing: 0.1em;
+      color: var(--accent); margin-bottom: 4px;
     }
 
-    .movie-title {
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 1.35;
-      color: var(--text);
-    }
+    .movie-title { font-size: 13px; font-weight: 500; line-height: 1.35; color: var(--text); }
 
-    /* --- Error / Loading --- */
-    .status-msg {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 40px 0;
-      display: none;
-    }
-
-    .error-msg {
-      text-align: center;
-      color: #ff6b6b;
-      font-size: 14px;
-      padding: 20px 0;
-      display: none;
-    }
+    /* Status */
+    .status-msg { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0; display: none; }
+    .error-msg  { text-align: center; color: #ff6b6b;     font-size: 14px; padding: 20px 0; display: none; }
 
     .spinner {
       width: 32px; height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
       margin: 0 auto 12px;
     }
 
-    /* --- Animations --- */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes cardIn {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    /* Animations */
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+    @keyframes cardIn   { to   { opacity:1; transform:translateY(0); } }
+    @keyframes spin     { to   { transform:rotate(360deg); } }
 
-    /* stagger cards */
     .movie-card:nth-child(1) { animation-delay: 0.05s; }
     .movie-card:nth-child(2) { animation-delay: 0.12s; }
     .movie-card:nth-child(3) { animation-delay: 0.19s; }
@@ -328,18 +266,20 @@
   </header>
 
   <section class="search-section">
-    <label class="search-label" for="movieInput">Enter a movie you love</label>
-    <div class="search-row">
-      <div class="autocomplete-wrapper">
-        <input
-          type="text"
-          id="movieInput"
-          placeholder="e.g. Inception, The Dark Knight…"
-          autocomplete="off"
-        />
-        <div id="suggestions"></div>
+    <label class="search-label" for="movieSelect">Select a movie you love</label>
+    <div class="select-row">
+      <div class="select-wrapper">
+        <span class="select-icon">🎥</span>
+        <select id="movieSelect">
+          <option value="" disabled selected>Loading movies…</option>
+        </select>
+        <div class="select-spinner" id="selectSpinner"></div>
+        <span class="select-arrow">▼</span>
       </div>
       <button id="recommendBtn" onclick="getRecommendations()">Recommend →</button>
+    </div>
+    <div class="movie-count" id="movieCount">
+      <span id="movieCountNum">0</span> movies available
     </div>
   </section>
 
@@ -347,6 +287,11 @@
     <div class="divider-line"></div>
     <span class="divider-text">Recommendations</span>
     <div class="divider-line"></div>
+  </div>
+
+  <div class="selected-banner" id="selectedBanner">
+    <span class="selected-banner-label">Because you liked →</span>
+    <span class="selected-banner-title" id="selectedTitle"></span>
   </div>
 
   <div id="results">
@@ -361,136 +306,116 @@
 </div>
 
 <script>
-  // ── Movie list for autocomplete (fetched from backend or hardcoded sample) ──
-  // Replace this array with your actual movie titles from movie_df or fetch from an endpoint
-  let ALL_MOVIES = [];
+  const selectEl      = document.getElementById('movieSelect');
+  const selectSpinner = document.getElementById('selectSpinner');
+  const movieCount    = document.getElementById('movieCount');
+  const movieCountNum = document.getElementById('movieCountNum');
 
-  // Try to load movie list from a /movies endpoint (optional)
-  fetch('/movies')
-    .then(r => r.json())
-    .then(data => { ALL_MOVIES = data.movies || []; })
-    .catch(() => { /* no autocomplete endpoint, that's fine */ });
+  // ── Load movie list from /movies endpoint on page load ──
+  async function loadMovies() {
+    selectSpinner.classList.add('visible');
+    try {
+      const res  = await fetch('/movies');
+      const data = await res.json();
+      const movies = data.movies || [];
 
-  // ── Autocomplete logic ──
-  const input = document.getElementById('movieInput');
-  const suggestionsBox = document.getElementById('suggestions');
-  let activeIndex = -1;
-
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    suggestionsBox.innerHTML = '';
-    activeIndex = -1;
-    if (!q || q.length < 2) { suggestionsBox.classList.remove('open'); return; }
-
-    const matches = ALL_MOVIES
-      .filter(m => m.toLowerCase().includes(q))
-      .slice(0, 8);
-
-    if (!matches.length) { suggestionsBox.classList.remove('open'); return; }
-
-    matches.forEach((m, i) => {
-      const item = document.createElement('div');
-      item.className = 'suggestion-item';
-      item.textContent = m;
-      item.addEventListener('mousedown', () => {
-        input.value = m;
-        suggestionsBox.classList.remove('open');
+      selectEl.innerHTML = '<option value="" disabled selected>— Choose a movie —</option>';
+      movies.forEach(title => {
+        const opt = document.createElement('option');
+        opt.value = title;
+        opt.textContent = title;
+        selectEl.appendChild(opt);
       });
-      suggestionsBox.appendChild(item);
-    });
-    suggestionsBox.classList.add('open');
-  });
 
-  input.addEventListener('keydown', (e) => {
-    const items = suggestionsBox.querySelectorAll('.suggestion-item');
-    if (e.key === 'ArrowDown') {
-      activeIndex = Math.min(activeIndex + 1, items.length - 1);
-      items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
-    } else if (e.key === 'ArrowUp') {
-      activeIndex = Math.max(activeIndex - 1, 0);
-      items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
-    } else if (e.key === 'Enter') {
-      if (activeIndex >= 0 && items[activeIndex]) {
-        input.value = items[activeIndex].textContent;
-        suggestionsBox.classList.remove('open');
-      } else {
-        getRecommendations();
-      }
-    } else if (e.key === 'Escape') {
-      suggestionsBox.classList.remove('open');
+      movieCountNum.textContent = movies.length.toLocaleString();
+      movieCount.classList.add('visible');
+    } catch (err) {
+      selectEl.innerHTML = '<option value="" disabled selected>— Could not load movies —</option>';
+      console.warn('Could not fetch /movies:', err);
+    } finally {
+      selectSpinner.classList.remove('visible');
     }
-  });
+  }
 
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.autocomplete-wrapper')) suggestionsBox.classList.remove('open');
-  });
+  loadMovies();
 
-  // ── Recommend function ──
+  // ── Recommend ──
   async function getRecommendations() {
-    const movieName = input.value.trim();
-    if (!movieName) { shakeInput(); return; }
+    const movieName = selectEl.value;
 
-    const btn = document.getElementById('recommendBtn');
-    const grid = document.getElementById('grid');
-    const loadingMsg = document.getElementById('loadingMsg');
-    const errorMsg = document.getElementById('errorMsg');
-    const divider = document.getElementById('divider');
+    if (!movieName) {
+      const row = document.querySelector('.select-row');
+      row.style.borderColor  = 'rgba(255,107,53,0.5)';
+      row.style.boxShadow    = '0 0 0 3px rgba(255,107,53,0.08)';
+      setTimeout(() => { row.style.borderColor = ''; row.style.boxShadow = ''; }, 800);
+      return;
+    }
 
-    btn.disabled = true;
-    btn.textContent = 'Loading…';
-    grid.innerHTML = '';
+    const btn           = document.getElementById('recommendBtn');
+    const grid          = document.getElementById('grid');
+    const loadingMsg    = document.getElementById('loadingMsg');
+    const errorMsg      = document.getElementById('errorMsg');
+    const divider       = document.getElementById('divider');
+    const selectedBanner= document.getElementById('selectedBanner');
+    const selectedTitle = document.getElementById('selectedTitle');
+
+    btn.disabled      = true;
+    btn.textContent   = 'Loading…';
+    selectEl.disabled = true;
+    grid.innerHTML    = '';
     errorMsg.style.display = 'none';
     loadingMsg.style.display = 'block';
     divider.classList.add('visible');
-    suggestionsBox.classList.remove('open');
+    selectedBanner.classList.remove('visible');
 
     try {
-      const res = await fetch(`/recommend?data=${encodeURIComponent(movieName)}`, {
+      const res = await fetch('/recommend', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: movieName })
       });
 
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const json = await res.json();
-
       loadingMsg.style.display = 'none';
 
       if (json.error) throw new Error(json.error);
 
       const recommendations = json.recommendation;
-      if (!recommendations || !recommendations.length) {
-        throw new Error('No recommendations found. Try another movie.');
-      }
+      if (!recommendations || !recommendations.length) throw new Error('No recommendations found.');
 
+      selectedTitle.textContent = movieName;
+      selectedBanner.classList.add('visible');
       renderCards(recommendations);
 
     } catch (err) {
       loadingMsg.style.display = 'none';
-      errorMsg.style.display = 'block';
-      errorMsg.textContent = '⚠️ ' + (err.message || 'Something went wrong. Please try again.');
+      errorMsg.style.display   = 'block';
+      errorMsg.textContent     = '⚠️ ' + (err.message || 'Something went wrong.');
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Recommend →';
+      btn.disabled      = false;
+      btn.textContent   = 'Recommend →';
+      selectEl.disabled = false;
     }
   }
 
   function renderCards(movies) {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
-
     movies.forEach((movie, i) => {
       const card = document.createElement('div');
       card.className = 'movie-card';
 
       const img = document.createElement('img');
-      img.src = movie.poster || 'https://via.placeholder.com/200x300/13131a/7a7a8a?text=No+Poster';
-      img.alt = movie.title;
-      img.onerror = () => { img.src = 'https://via.placeholder.com/200x300/13131a/7a7a8a?text=No+Poster'; };
+      img.src     = movie.poster || 'https://placehold.co/200x300/13131a/7a7a8a?text=No+Poster';
+      img.alt     = movie.title;
+      img.loading = 'lazy';
+      img.onerror = () => { img.src = 'https://placehold.co/200x300/13131a/7a7a8a?text=No+Poster'; };
 
-      const body = document.createElement('div');
+      const body  = document.createElement('div');
       body.className = 'movie-card-body';
 
-      const rank = document.createElement('div');
+      const rank  = document.createElement('div');
       rank.className = 'movie-rank';
       rank.textContent = `#${i + 1} Pick`;
 
@@ -504,13 +429,6 @@
       card.appendChild(body);
       grid.appendChild(card);
     });
-  }
-
-  function shakeInput() {
-    const row = document.querySelector('.search-row');
-    row.style.animation = 'none';
-    row.style.borderColor = 'rgba(255,107,53,0.5)';
-    setTimeout(() => { row.style.borderColor = ''; }, 800);
   }
 </script>
 </body>
