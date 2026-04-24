@@ -16,7 +16,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="statics"), name="statics")
 
 
-movies, similarity_data = load_obj()  #loading the trained pickle files
+
 
 
 class RecommendRequest(BaseModel):
@@ -30,6 +30,7 @@ def root():
 # this endpoint returns all the available movie list
 @app.get("/movies")
 def get_movies():
+    movies, similarity_data = load_obj()  #loading the trained pickle files
     return {"movies": movies["title"].tolist()}
 
 

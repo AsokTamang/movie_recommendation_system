@@ -16,7 +16,7 @@ def load_obj():  # function which loads the trained pickle object
         return movies, similarity_data
 
 
-movies, similarity_data = load_obj()
+
 
 
 def fetch_poster(movie_id):
@@ -29,6 +29,7 @@ def fetch_poster(movie_id):
 
 
 def recommend_movies(movie_name):
+    movies, similarity_data = load_obj()
     movie_index = movies[
         movies["title"].str.strip().str.lower() == movie_name.strip().lower()
     ].index[
