@@ -1,12 +1,11 @@
 import sys
-
 sys.path.append(".")
 import pickle
 import sys
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from utils import recommend_movies
+from utils import recommend_movies,load_obj
 import uvicorn
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
@@ -17,6 +16,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="statics"), name="statics")
 
 
+movies, similarity_data = load_obj()  #loading the trained pickle files
 
 
 class RecommendRequest(BaseModel):
@@ -30,7 +30,6 @@ def root():
 # this endpoint returns all the available movie list
 @app.get("/movies")
 def get_movies():
-    movies = pickle.load(open("artifacts/movie_df.pkl", "rb"))
     return {"movies": movies["title"].tolist()}
 
 
