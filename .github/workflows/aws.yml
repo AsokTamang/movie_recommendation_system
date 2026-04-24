@@ -61,6 +61,12 @@ jobs:
         run: |
            ls -la
            cat Dockerfile
+
+      - name: Download model artifacts from S3
+        run: |
+           mkdir -p artifacts
+           aws s3 cp s3://movie-recommendation-pickles/artifacts/ artifacts/ --recursive   #artifacts downloaded from the s3 bucket, this artifacts folder has the trained pickle files
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
